@@ -2,7 +2,6 @@
 
 from flask import Flask, render_template, request, session
 import pandas as pd
-#from summarization import load_dataframe, summarize_with_textrank, summarize_with_BERT, get_speaker_topics, get_possible_speakers, get_img_urls
 import json
 import os
 import sys
@@ -65,8 +64,8 @@ def process_topic():
 	topic_input = request.args.get('topic_input')
 
    	# Apply summarization algorithm(s)
-	original_passages, summary = summ.summarize_with_textrank(df, session['speaker_input'], topic_input)
-	#original_passages, summary = summarize_with_BERT(df, session['speaker_input'], topic_input)
+	original_passages, speech_dates, summary = summ.summarize_speeches(df, session['speaker_input'], topic_input, 'TextRank')
+	#original_passages, summary = summ.summarize_speeches(df, session['speaker_input'], topic_input, 'BERT')
 
    	# Case if empty
 	if session['speaker_input'] != '' and (topic_input is None or topic_input == ''):
@@ -85,8 +84,9 @@ def process_topic():
 					possible_speakers=possible_speakers,
    					speaker_input=session['speaker_input'],
 					topic_input=topic_input,
-                    textrank_summary=summary,
+                    summary=summary,
 					original_passages=original_passages,
+					speech_dates=speech_dates,
 					pic_url= pic_url,
                  	my_form_status="complete")
 
