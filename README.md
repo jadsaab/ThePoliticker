@@ -12,17 +12,23 @@ The Politicker aims to bring users closer to what their political representative
 
 ## How do you use The Politicker?
 
-From the home page, enter the name of a Canadian Member of Parliament (MP).
+The home page looks like this:
 
 ![Screenshot of The Politicker home page.](./media/screenshot_home.png)
 
-Next, enter a topic. Autocomplete suggestions are limited to those discussed by the selected MP.
+Enter the name of a Canadian Member of Parliament (MP):
 
-![Screenshot showing the result after entering an MP. A picture of the MP appears.](./media/screenshot_choose_MP.png)
+![Screenshot showing the MP field before pressing enter.](./media/screenshot_choose_MP.png)
 
-Soon afterwards, you will see a summary of all that he or she said on that topic during parliamentary debates. Underneath the summary, you can explore all of the speeches that were considered in creating the summary.
+Next, enter a topic. Autocomplete suggestions are limited to those discussed by the selected MP:
 
-![Screenshot showing the result after entering a topic. An automated summary appears, with the speeches considered for that summary underneath.](./media/screenshot_choose_topic.png)
+![Screenshot showing the result of choosing an MP (a picture of the MP appears). Also shows the topic field partially filled out.](./media/screenshot_choose_topic.png)
+
+Soon afterwards, you will see a summary of all that he or she said on that topic during parliamentary debates:
+
+![Screenshot showing the result after entering a topic. An automated summary appears, with the speeches considered for that summary underneath.](./media/screenshot_summary.png)
+
+The highlighting indicates chronology, with the brightest sentence coming from the most recent speech. Underneath the summary, you can explore all of the speeches that were considered in creating the summary. You can also click on a sentence in the summary to see its source speech.
 
 
 ## How does The Politicker work?
