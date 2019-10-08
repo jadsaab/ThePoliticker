@@ -1,21 +1,28 @@
 # The Politicker
 
-What are your political representatives saying?
+What are your representatives (actually) saying?
+
 
 ## What is The Politicker?
 
-Almost daily, your Members of Parliament make decisions on your behalf.
+In June of 2016, the United Kingdom chose to leave the European Union as part of the 'Brexit' referendum, with [51.9% voting in favour of leaving](https://www.bbc.com/news/politics/eu_referendum/results). Since then, many follow-up polls show that voters have shifted towards remaining in the Union. While the reasons for this shift are complicated, post-referendum surveys suggest at least part of the explanation: voters did not fully understand the implications of a Brexit. The information available to their Members of Parliament did not reach them effectively. In Canada, a country with the same system of government, what can be done to preempt (or bridge) such information gaps?
+
+The Politicker aims to bring users closer to what their political representatives are saying. In Canadian federal politics, parliamentary sessions are the main forum for political decision-making. Transcripts of each session are publicly available. However, a given discussion can span many days and multiple speeches. The Politicker applies automated text summarization to these transcripts, making it faster and easier for Canadians to follow the decisions being made on their behalf.
 
 
 ## How do you use The Politicker?
 
-Enter the name of a Canadian Member of Parliament (MP), followed by a topic that you would like to learn more about.
+From the home page, enter the name of a Canadian Member of Parliament (MP).
 
+![Screenshot of The Politicker home page.](./media/screenshot_home.png)
 
-Soon afterwards, you will see a summary of all that he or she said on that topic during parliamentary debates.
+Next, enter a topic. Autocomplete suggestions are limited to those discussed by the selected MP.
 
+![Screenshot showing the result after entering an MP. A picture of the MP appears.](./media/screenshot_choose_MP.png)
 
-Underneath the summary, you can explore all of the speeches that were considered in creating the summary.
+Soon afterwards, you will see a summary of all that he or she said on that topic during parliamentary debates. Underneath the summary, you can explore all of the speeches that were considered in creating the summary.
+
+![Screenshot showing the result after entering a topic. An automated summary appears, with the speeches considered for that summary underneath.](./media/screenshot_choose_topic.png)
 
 
 ## How does The Politicker work?
@@ -33,3 +40,10 @@ The Politicker's extractive algorithm performs four steps: 1) Encoding the token
 
 ### BERT
 The original BERT [publication](https://arxiv.org/abs/1810.04805).
+
+### Data Sources
+Lipad for [CSV versions](https://www.lipad.ca/data/) of Hansard transcripts.
+Kaggle for [BBC News Summaries](https://www.kaggle.com/pariza/bbc-news-summary).
+
+### Evaluation
+[Sumeval](https://github.com/chakki-works/sumeval) for computing [ROUGE](https://en.wikipedia.org/wiki/ROUGE_(metric)) scores.
