@@ -46,4 +46,4 @@ Lipad for [CSV versions](https://www.lipad.ca/data/) of Hansard transcripts.
 Kaggle for [BBC News Summaries](https://www.kaggle.com/pariza/bbc-news-summary).
 
 ### Evaluation
-[Sumeval](https://github.com/chakki-works/sumeval) for computing [ROUGE](https://en.wikipedia.org/wiki/ROUGE_(metric)) scores.
+[Sumeval](https://github.com/chakki-works/sumeval) for computing [ROUGE](https://en.wikipedia.org/wiki/ROUGE_%28metric%29) scores.
