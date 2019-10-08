@@ -69,7 +69,8 @@
               {{topic_input}}
               <br> <br>
               <h3 class="card-title">Summary</h3>
-              <p class="card-text"> {{textrank_summary}} </p>
+              <p class="card-text" id="summary"></p>
+              <p id="test"></p>
               <h4></h4>
             {% endif %}
 
@@ -106,6 +107,7 @@
   <script src="../static/vendor/jquery/jquery.min.js"></script>
   <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+  <!-- Populate dropdown with possible speakers -->
   <script>
     var possible_speakers = {{possible_speakers|tojson}}
       $.each(possible_speakers, function(i, item) {
@@ -113,6 +115,7 @@
     });
   </script>
 
+  <!-- Populate dropdown with possible topics for selected speaker -->
   {% if my_form_status=='speaker_only' %}
     <script>
       var possible_topics = {{possible_topics|tojson}}
@@ -122,30 +125,98 @@
     </script>
   {% endif %}
 
+  <!-- Function that produces array with numbers equally spaced between start
+  and stop value -->
+  <script>
+  function makeArr(startValue, stopValue, numSteps) {
+    var arr = [];
+    var step = (stopValue - startValue) / (numSteps - 1);
+    for (var i = 0; i < numSteps; i++) {
+      arr.push(stopValue - (step * i));
+    }
+    return arr;
+  }
+  </script>
+
   {% if my_form_status=='complete' %}
     <script>
-      console.log({{original_passages|tojson}})
-      var originals_passages = {{original_passages|tojson}}
-      var speechCard =document.getElementById("speech-card")
 
-      var span = document.createElement('span')
-      span.class = "text-warning"
-      span.innerHTML = "&#9733; &#9733; &#9733; &#9733; &#9734;"
-      document.getElementById('summary-section').appendChild(span)
+      // Store incoming data as JSON
+      var summary = {{summary|tojson}}[0]
+      var originalSpeeches = {{original_passages|tojson}}
+      var speechDates = {{speech_dates|tojson}}
+      console.log(originalSpeeches)
+      console.log(summary)
 
-      for (let i=0; i<originals_passages.length; i++) {
+      // Each sentence in the summary will be color-coded according to its
+      // source speech. Color brightness indicates chronology (brightest for
+      // most recent speech). If each sentence comes form a different speech,
+      // we need a different color for each - initialize arrays accordingly
+      rgbArray = makeArr(155, 255, summary.length)
+      alphaArray = makeArr(0.2, 1, summary.length)
+
+      // Arrays to keep track of RGB value and source speech for each sentence
+      // in summary
+      var rgbIndPerSummarySentence = Array(summary.length)
+      var sourceOfSummarySentence = Array(summary.length)
+      var rgbInd = 0
+
+      // Loop that adds original speeches to page
+      var speechCard = document.getElementById("speech-card")
+      for (let i=0; i<originalSpeeches.length; i++) {
+
+        // Initialize elements for this speech
         var p = document.createElement('p');
         var hr = document.createElement('hr');
         var smallText = document.createElement('small')
 
-        p.innerHTML = originals_passages[i]
-        smallText.class = "text-muted"
-        smallText.innerHTML = "Spoken on 3/1/17"
+        // Add highlighting to sentences in speech that are also sentences in
+        // the summary
+        processedPassage = originalSpeeches[i]
+        matchStatus = false
+        for (let j=0; j<summary.length; j++) {
+          matchInd = processedPassage.indexOf(summary[j])
+          if (matchInd >=0) {
+            matchStatus = true
+            rgbIndPerSummarySentence[j] = rgbInd
+            sourceOfSummarySentence[j] = i
+            processedPassage = processedPassage.slice(0, matchInd-1) +
+                                "<span style='background-color: rgb(" + rgbArray[rgbInd].toString() + ", " + rgbArray[rgbInd].toString() + ", 0," + alphaArray[rgbInd].toString() + ")'> " +
+                                processedPassage.slice(matchInd, matchInd+summary[j].length) +
+                                " </span>" +
+                                processedPassage.slice(matchInd+summary[j].length + 1)
+          }
+        }
 
+        // Add elements for this speech
+        p.innerHTML = processedPassage
+        p.id = 'passage' + i.toString()
+        smallText.class = "text-muted"
+        smallText.innerHTML = "Spoken on " + speechDates[i]
         document.getElementById('speech-card').appendChild(p);
         document.getElementById('speech-card').appendChild(smallText);
         document.getElementById('speech-card').appendChild(hr);
+
+        // If we found a summary sentence in the latest speech, we need a new
+        // color - increment the RGB index
+        if (matchStatus == true) {
+          rgbInd = rgbInd + 1
+          matchStatus = false
+        }
       }
+
+      // Add summary to page
+      var processedSentence = ''
+      for (let k=0; k<summary.length; k++) {
+        rgbInd = rgbIndPerSummarySentence[k]
+        console.log(rgbIndPerSummarySentence)
+        processedSentence = "<a href=#passage" + sourceOfSummarySentence[k] + " style='color:black; visited:none; background-color: rgb(" + rgbArray[rgbInd].toString() + ", " + rgbArray[rgbInd].toString() + ", 0," + alphaArray[rgbInd].toString() + ")'> " +
+                            summary[k] +
+                            " </a>"
+        document.getElementById('summary').innerHTML =
+           document.getElementById('summary').innerHTML + ' ' + processedSentence
+      }
+
     </script>
   {% else %}
   {% endif %}
