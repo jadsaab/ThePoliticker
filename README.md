@@ -1,3 +1,5 @@
+
+![Header image of Parliament Hill.](./media/thepoliticker_header.png)
 # The Politicker
 
 What are your representatives (actually) saying?
@@ -12,15 +14,15 @@ The Politicker aims to bring users closer to what their political representative
 
 ## How do you use The Politicker?
 
-The home page looks like this:
+From the home page...
 
 ![Screenshot of The Politicker home page.](./media/screenshot_home.png)
 
-Enter the name of a Canadian Member of Parliament (MP):
+...enter the name of a Canadian Member of Parliament (MP):
 
 ![Screenshot showing the MP field before pressing enter.](./media/screenshot_choose_MP.png)
 
-Next, enter a topic. Autocomplete suggestions are limited to those discussed by the selected MP:
+Next, enter a topic. Autocomplete suggestions are limited to those discussed by the selected MP (note that autocomplete functionality may not work for all browsers):
 
 ![Screenshot showing the result of choosing an MP (a picture of the MP appears). Also shows the topic field partially filled out.](./media/screenshot_choose_topic.png)
 
