@@ -40,7 +40,7 @@ def get_img_urls(root_url):
     page = requests.get(root_url + '1')
     tree = html.fromstring(page.content)
     paging_btn_grp = tree.xpath('//nav[@class="paging btn-group"]/div/ul/li/a/@href')
-    num_of_pages = int(re.findall('=\d*', paging_btn_grp[-1])[0][1:])
+    num_of_pages = 1#int(re.findall('=\d*', paging_btn_grp[-1])[0][1:])
 
     # Loop through pages and store URLs to images
     pic_urls_across_pages = {}
@@ -53,20 +53,25 @@ def get_img_urls(root_url):
         tree = html.fromstring(page.content)
 
         # Store names and URLs from MP profiles on this page
-        pic_urls = tree.xpath('//img[@class="picture"]//@src')
-        first_names = tree.xpath('//span[@class="first-name"]/text()')
-        last_names = tree.xpath('//span[@class="last-name"]/text()')
-
-        if len(pic_urls) == len(first_names) and len(pic_urls) == len(last_names):
+        #pic_urls = tree.xpath('//img[@class="picture"]//@src')
+        #first_names = tree.xpath('//span[@class="first-name"]/text()')
+        #last_names = tree.xpath('//span[@class="last-name"]/text()')
+        pic_urls = tree.xpath('//img[@class="ce-mip-mp-picture visible-lg visible-md img-fluid"]//@src')
+        full_names = tree.xpath('//div[@class="ce-mip-mp-name"]/text()')
+        print(len(pic_urls), len(full_names))
+        if len(pic_urls) == len(full_names): #len(first_names) and len(pic_urls) == len(last_names):
             # Update dictionary with names and URLs on this page
-            full_names = [(first_names[i] + ' ' + last_names[i]) for i in range(len(pic_urls))]
-            pic_urls_across_pages.update({full_names[i]: 'https:' + pic_urls[i] for i in range(len(pic_urls))})
+            #full_names = [(first_names[i] + ' ' + last_names[i]) for i in range(len(pic_urls))]
+            full_names = [full_names[i] for i in range(len(full_names))]
+            pic_urls_across_pages.update({full_names[i]: 'https://www.ourcommons.ca' + pic_urls[i] for i in range(len(pic_urls))})
         else:
-            print('Mismatch of information when parsing MP profiles (%d pictures, %d first names, %d last names), aborting.\n' %
-                  (len(pic_urls), len(first_names), len(last_names)))
+            #print('Mismatch of information when parsing MP profiles (%d pictures, %d first names, %d last names), aborting.\n' %
+            #      (len(pic_urls), len(first_names), len(last_names)))
+            print('Mismatch of information when parsing MP profiles (%d pictures, %d full names), aborting.\n' %
+                  (len(pic_urls), len(full_names)))
             is_successful = False
             break
-
+    print(pic_urls_across_pages)
     if is_successful == False:
         pic_urls_across_pages['Placeholder'] = '../static/img/placeholder.png'
 
