@@ -50,8 +50,11 @@ The Politicker's extractive algorithm performs four steps: 1) Encoding the token
 The original BERT [publication](https://arxiv.org/abs/1810.04805).
 
 ### Data Sources
-Lipad for [CSV versions](https://www.lipad.ca/data/) of Hansard transcripts.
+Lipad for [Hansard transcripts](https://www.lipad.ca/data/).
+
 Kaggle for [BBC News Summaries](https://www.kaggle.com/pariza/bbc-news-summary).
 
 ### Evaluation
+[Publication](https://www.aclweb.org/anthology/W04-1013.pdf) describing the original ROUGE metrics.
+
 [Sumeval](https://github.com/chakki-works/sumeval) for computing [ROUGE](https://en.wikipedia.org/wiki/ROUGE_%28metric%29) scores.
