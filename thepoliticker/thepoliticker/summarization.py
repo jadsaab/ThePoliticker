@@ -40,7 +40,7 @@ def get_img_urls(root_url):
     page = requests.get(root_url + '1')
     tree = html.fromstring(page.content)
     paging_btn_grp = tree.xpath('//nav[@class="paging btn-group"]/div/ul/li/a/@href')
-    num_of_pages = 1#int(re.findall('=\d*', paging_btn_grp[-1])[0][1:])
+    num_of_pages = 1
 
     # Loop through pages and store URLs to images
     pic_urls_across_pages = {}
@@ -53,25 +53,19 @@ def get_img_urls(root_url):
         tree = html.fromstring(page.content)
 
         # Store names and URLs from MP profiles on this page
-        #pic_urls = tree.xpath('//img[@class="picture"]//@src')
-        #first_names = tree.xpath('//span[@class="first-name"]/text()')
-        #last_names = tree.xpath('//span[@class="last-name"]/text()')
         pic_urls = tree.xpath('//img[@class="ce-mip-mp-picture visible-lg visible-md img-fluid"]//@src')
         full_names = tree.xpath('//div[@class="ce-mip-mp-name"]/text()')
         print(len(pic_urls), len(full_names))
-        if len(pic_urls) == len(full_names): #len(first_names) and len(pic_urls) == len(last_names):
+        if len(pic_urls) == len(full_names):
             # Update dictionary with names and URLs on this page
-            #full_names = [(first_names[i] + ' ' + last_names[i]) for i in range(len(pic_urls))]
             full_names = [full_names[i] for i in range(len(full_names))]
             pic_urls_across_pages.update({full_names[i]: 'https://www.ourcommons.ca' + pic_urls[i] for i in range(len(pic_urls))})
         else:
-            #print('Mismatch of information when parsing MP profiles (%d pictures, %d first names, %d last names), aborting.\n' %
-            #      (len(pic_urls), len(first_names), len(last_names)))
             print('Mismatch of information when parsing MP profiles (%d pictures, %d full names), aborting.\n' %
                   (len(pic_urls), len(full_names)))
             is_successful = False
             break
-    print(pic_urls_across_pages)
+
     if is_successful == False:
         pic_urls_across_pages['Placeholder'] = '../static/img/placeholder.png'
 
@@ -118,88 +112,81 @@ def query_dataframe(df, speakername, topic):
 
     return speeches, dates
 
-def run_textrank(text_to_summarize, num_sentences = max_sentences):
+
+def run_textrank(text_to_summarize, word_count=200):
+
     """
+    num_sentences = max_sentences
     Function that produces a summary using the TextRank algorithm
     """
 
-    raw_summary = summarize(text_to_summarize, ratio=0.25)
+    raw_summary = summarize(text_to_summarize, word_count=word_count)
     tokenized_sentences = tokenize.sent_tokenize(raw_summary)
-    print(type(tokenized_sentences))
+    num_sentences = len(tokenized_sentences)
 
-    if len(tokenized_sentences) > num_sentences:
-
-        #summary = ' '.join(tokenized_sentences[0:num_sentences])
-        summary = tokenized_sentences[0:num_sentences]
-    else:
-        #summary = ' '.join(tokenized_sentences)
-        summary = tokenized_sentences
-
-    return summary, num_sentences;
+    return tokenized_sentences, num_sentences;
 
 
-def run_BERT(text_to_summarize, max_sentences = max_sentences):
+def run_BERT(text_to_summarize, max_sentences = max_sentences, compute_elbow=False):
     """
     Function that produces a summary by first embedding sentences using BERT,
     clustering those embeddings, and selecting the sentence from each cluster
     that's closest to the centroid
     """
+
     # Segment concatenated string into sentences
     tokenized_sentences = tokenize.sent_tokenize(text_to_summarize)
-    print(len(tokenized_sentences))
     speech_embeddings = np.array(embedder.encode(tokenized_sentences))
-    print(speech_embeddings.shape)
+    print('Shape of BERT embeddings: ' + str(speech_embeddings.shape))
 
-    # Perform K-Means clustering. Summary will consist of sentence in each
-    # cluster that is closest to the centroid
-    #num_clusters = max_sentences
-    #km = KMeans(num_clusters)
-    #preds = km.fit_predict(speech_embeddings)
+    if compute_elbow:
+        distortions = []
+        K = range(1, max_sentences+1)
+        for k in K:
+            km = KMeans(n_clusters=k).fit(speech_embeddings)
+            km.fit(speech_embeddings)
+            distortions.append(sum(np.min(cdist(speech_embeddings, km.cluster_centers_, 'euclidean'), axis=1)) / speech_embeddings.shape[0])
 
-    distortions = []
-    print(max_sentences)
-    K = range(1, max_sentences+1)
-    for k in K:
-        km = KMeans(n_clusters=k).fit(speech_embeddings)
-        km.fit(speech_embeddings)
-        distortions.append(sum(np.min(cdist(speech_embeddings, km.cluster_centers_, 'euclidean'), axis=1)) / speech_embeddings.shape[0])
+        # Compute first and second numerical derivatives
+        distortion_prime = [a - b for a, b in zip(distortions[1:], distortions[0:-1])]
+        distortion_prime.insert(0, 0)
 
-    # Compute first and second numerical derivatives
-    distortion_prime = [a - b for a, b in zip(distortions[1:], distortions[0:-1])]
-    distortion_prime.insert(0, 0)
+        distortion_double_prime = [a - b for a, b in zip(distortion_prime[1:], distortion_prime[0:-1])]
+        distortion_double_prime.insert(0, 0)
 
-    distortion_double_prime = [a - b for a, b in zip(distortion_prime[1:], distortion_prime[0:-1])]
-    distortion_double_prime.insert(0, 0)
+        # Plot the elbow
+        plt.subplot(3,1,1)
+        plt.plot(K, distortion_prime, 'bx-')
+        plt.xlabel('k')
+        plt.ylabel('distortion_prime')
+        plt.title('distortion_prime')
+        plt.show()
 
-    plt.subplot(3,1,1)
-    plt.plot(K, distortion_prime, 'bx-')
-    plt.xlabel('k')
-    plt.ylabel('distortion_prime')
-    plt.title('distortion_prime')
-    plt.show()
+        plt.subplot(3,1,2)
+        plt.plot(K, distortions, 'bx-')
+        plt.xlabel('k')
+        plt.ylabel('Distortion')
+        plt.title('The Elbow Method showing the optimal k')
+        plt.show()
 
-    # Plot the elbow
-    plt.subplot(3,1,2)
-    plt.plot(K, distortions, 'bx-')
-    plt.xlabel('k')
-    plt.ylabel('Distortion')
-    plt.title('The Elbow Method showing the optimal k')
-    plt.show()
+        plt.subplot(3,1,3)
+        plt.plot(K, distortion_double_prime, 'bx-')
+        plt.xlabel('k')
+        plt.ylabel('distortion_double_prime')
+        plt.title('distortion_double_prime')
+        plt.show()
 
-    plt.subplot(3,1,3)
-    plt.plot(K, distortion_double_prime, 'bx-')
-    plt.xlabel('k')
-    plt.ylabel('distortion_double_prime')
-    plt.title('distortion_double_prime')
-    plt.show()
-
-    # Identify elbow/ inflection using second derivative
-    num_clusters = np.argmax(np.array(distortion_double_prime), axis=0)
+        # Identify elbow/ inflection using second derivative
+        num_clusters = np.argmax(np.array(distortion_double_prime), axis=0)
+    else:
+        num_clusters = max_sentences
 
     # Cluster using empirically determined number of clusters
     km = KMeans(int(num_clusters))
     preds = km.fit_predict(speech_embeddings)
 
+    # Summary will consist of sentence in each cluster that is closest to
+    # the centroid
     summary = ''
     for this_label in range(num_clusters):
         mask = preds == this_label
@@ -223,7 +210,7 @@ def summarize_speeches(df, speakername, topic, method='TextRank'):
     dates = dates.iloc[::-1]
 
     # Store speeches as a concatenated string (to be passed to TextRank)
-    # Store speeches as list (to be returned by this function)
+    # and store speeches as list (to be returned by this function)
     original_passages = []
     original_dates = []
     text_to_summarize = ''
